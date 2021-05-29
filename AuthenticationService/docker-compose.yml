@@ -1,0 +1,42 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres:12-alpine
+    container_name: "galactic-trade-auth-database"
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - galactic-trade
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: "galactic-trade-auth-rest-api"
+    environment:
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DB=postgres
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_PORT=5432
+      - SSL_MODE=disable
+      - JWT_KEY=fi835979f8ahsfha5903u2rjkafiosfhjas8io89asfjasklfnasgnbavikj90235u0juioawsg8aw0989038smf
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - galactic-trade
+
+volumes:
+  database_postgres:
+
+networks:
+  galactic-trade:
+    driver: bridge
