@@ -1,9 +1,9 @@
 package middlewares
 
 import (
+	"context"
 	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/service"
-	"context"
 	"github.com/go-kit/kit/log"
 	"time"
 )
@@ -15,7 +15,7 @@ type LoggingMiddleware struct {
 
 func (l *LoggingMiddleware) Login(ctx context.Context, username string, password string) (user database.User,token string,err error) {
 	defer func(begin time.Time) {
-		err := l.Logger.Log("method", "login", "user", user.Fullname, "token", token, "err", err, "took", time.Since(begin))
+		err := l.Logger.Log("method", "login", "user", user.Fullname,"err", err, "took", time.Since(begin))
 		if err != nil {
 			return
 		}

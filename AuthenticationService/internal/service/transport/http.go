@@ -4,6 +4,7 @@ import (
 	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/service/endpoints"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
@@ -18,6 +19,7 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	router.Handle("/auth/register",registerHandler).Methods(http.MethodPost)
 	router.Handle("/user/getAll",getAllHandler).Methods(http.MethodGet)
 	router.Handle("/auth/user",authUserHandler).Methods(http.MethodGet)
+	router.Handle("/metrics",promhttp.Handler()).Methods(http.MethodGet)
 
 	return router
 }
