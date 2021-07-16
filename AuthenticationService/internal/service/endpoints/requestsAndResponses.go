@@ -1,12 +1,25 @@
 package endpoints
 
 import (
-	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	"context"
 	"encoding/json"
+	"errors"
+	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	"net/http"
 	"strings"
 )
+
+func GetAuthToken(r *http.Request) (string,error) {
+	authHeader:=r.Header["Authorization"]
+	if len(authHeader)==0 {
+		return "", errors.New("no auth header")
+	}
+	authHeaderParts:=strings.Split(authHeader[0]," ")
+	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
+		return "",errors.New("invalid auth header")
+	}
+	return authHeaderParts[1],nil
+}
 
 type LoginRequest struct {
 	Username string `json:"username"`
@@ -78,11 +91,10 @@ func DecodeGetAllRequest(ctx context.Context, r *http.Request) (interface{}, err
 }
 func DecodeAuthUserRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request AuthUserRequest
-	authHeader:=r.Header["Authorization"]
-	authHeaderParts:=strings.Split(authHeader[0]," ")
-	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
-		return request,nil
+	token,err:=GetAuthToken(r)
+	if err != nil {
+		return request,err
 	}
-	request.Token=authHeaderParts[1]
+	request.Token=token
 	return request,nil
 }

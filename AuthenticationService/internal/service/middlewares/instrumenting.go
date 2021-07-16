@@ -28,7 +28,7 @@ func (i *InstrumentingMiddleware) Login(ctx context.Context, username string, pa
 
 func (i *InstrumentingMiddleware) Register(ctx context.Context, user database.UserIn) (msg string,err error) {
 	defer func(begin time.Time) {
-		lvs:=[]string{"method","Login","error",fmt.Sprint(err!=nil)}
+		lvs:=[]string{"method","Register","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
@@ -38,7 +38,7 @@ func (i *InstrumentingMiddleware) Register(ctx context.Context, user database.Us
 
 func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (users []database.User,err error) {
 	defer func(begin time.Time) {
-		lvs:=[]string{"method","Login","error",fmt.Sprint(err!=nil)}
+		lvs:=[]string{"method","GetAll","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
@@ -48,7 +48,7 @@ func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (users []database.
 
 func (i *InstrumentingMiddleware) AuthUser(ctx context.Context, tokenString string) (user database.User,err error) {
 	defer func(begin time.Time) {
-		lvs:=[]string{"method","Login","error",fmt.Sprint(err!=nil)}
+		lvs:=[]string{"method","AuthUser","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())

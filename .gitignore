@@ -1,3 +1,6 @@
 AuthenticationService/.idea
 AuthenticationService/vendor
 .idea
+GroupService/.idea
+GroupService/vendor
+GroupService/.env

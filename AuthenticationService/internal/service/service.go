@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	"context"
+	"errors"
+	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	stdjwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -101,7 +102,7 @@ func (a *AuthenticationService) AuthUser(ctx context.Context, tokenString string
 		}
 		return userDB,nil
 	}
-	return database.User{}, nil
+	return database.User{}, errors.New("Not found")
 }
 
 type AuthenticationService struct {
