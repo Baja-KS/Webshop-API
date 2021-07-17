@@ -1,12 +1,11 @@
 package transport
 
 import (
-	"GroupService/internal/service/endpoints"
+	"CategoryService/internal/service/endpoints"
 	"context"
 	"errors"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strings"
 )
@@ -38,17 +37,18 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	CreateHandler:=httptransport.NewServer(ep.CreateEndpoint,endpoints.DecodeCreateRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 	UpdateHandler:=httptransport.NewServer(ep.UpdateEndpoint,endpoints.DecodeUpdateRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 	DeleteHandler:=httptransport.NewServer(ep.DeleteEndpoint,endpoints.DecodeDeleteRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
-	CategoriesHandler:=httptransport.NewServer(ep.CategoriesEndpoint,endpoints.DecodeCategoriesRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
+	ProductsHandler:=httptransport.NewServer(ep.ProductsEndpoint,endpoints.DecodeProductsRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 	GetByIDHandler:=httptransport.NewServer(ep.GetByIDEndpoint,endpoints.DecodeGetByIDRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
+	GetByGroupIDHandler:=httptransport.NewServer(ep.GetByGroupIDEndpoint,endpoints.DecodeGetByGroupIDRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 
 
 	router.Handle("/GetAll",GetAllHandler).Methods(http.MethodGet)
 	router.Handle("/Create",CreateHandler).Methods(http.MethodPost)
 	router.Handle("/Update/{id}",UpdateHandler).Methods(http.MethodPut)
 	router.Handle("/Delete/{id}",DeleteHandler).Methods(http.MethodDelete)
-	router.Handle("/Categories/{id}",CategoriesHandler).Methods(http.MethodGet)
+	router.Handle("/Products/{id}",ProductsHandler).Methods(http.MethodGet)
 	router.Handle("/GetByID/{id}",GetByIDHandler).Methods(http.MethodGet)
-	router.Handle("/metrics",promhttp.Handler()).Methods(http.MethodGet)
+	router.Handle("/GetByGroupID/{id}",GetByGroupIDHandler).Methods(http.MethodGet)
 
 
 	return router

@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"GroupService/internal/service"
+	"CategoryService/internal/service"
 	"context"
 	"github.com/go-kit/kit/endpoint"
 )
@@ -11,8 +11,9 @@ type EndpointSet struct {
 	CreateEndpoint endpoint.Endpoint
 	UpdateEndpoint endpoint.Endpoint
 	DeleteEndpoint endpoint.Endpoint
-	CategoriesEndpoint endpoint.Endpoint
+	ProductsEndpoint endpoint.Endpoint
 	GetByIDEndpoint endpoint.Endpoint
+	GetByGroupIDEndpoint endpoint.Endpoint
 }
 
 func NewEndpointSet(svc service.Service) EndpointSet {
@@ -21,24 +22,25 @@ func NewEndpointSet(svc service.Service) EndpointSet {
 		CreateEndpoint:    MakeCreateEndpoint(svc),
 		UpdateEndpoint:    MakeUpdateEndpoint(svc),
 		DeleteEndpoint:    MakeDeleteEndpoint(svc),
-		CategoriesEndpoint:    MakeCategoriesEndpoint(svc),
+		ProductsEndpoint:    MakeProductsEndpoint(svc),
 		GetByIDEndpoint:    MakeGetByIDEndpoint(svc),
+		GetByGroupIDEndpoint: MakeGetByGroupIDEndpoint(svc),
 	}
 }
 
 func MakeGetAllEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		groups,err:=svc.GetAll(ctx)
+		categories,err:=svc.GetAll(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return GetAllResponse{Groups: groups},nil
+		return GetAllResponse{Categories: categories},nil
 	}
 }
 func MakeCreateEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(CreateRequest)
-		msg,err:=svc.Create(ctx, req.Input)
+		msg,err:=svc.Create(ctx,req.Data)
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +50,7 @@ func MakeCreateEndpoint(svc service.Service) endpoint.Endpoint {
 func MakeUpdateEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(UpdateRequest)
-		msg,err:=svc.Update(ctx, req.ID, req.Data)
+		msg,err:=svc.Update(ctx,req.ID,req.Data)
 		if err != nil {
 			return nil, err
 		}
@@ -58,30 +60,41 @@ func MakeUpdateEndpoint(svc service.Service) endpoint.Endpoint {
 func MakeDeleteEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(DeleteRequest)
-		msg,err:=svc.Delete(ctx, req.ID)
+		msg,err:=svc.Delete(ctx,req.ID)
 		if err != nil {
 			return nil, err
 		}
 		return DeleteResponse{Message: msg},nil
 	}
 }
-func MakeCategoriesEndpoint(svc service.Service) endpoint.Endpoint {
+func MakeProductsEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-        req:=request.(CategoriesRequest)
-		categories,err:=svc.Categories(ctx,req.ID)
+        req:=request.(ProductsRequest)
+		products,err:=svc.Products(ctx,req.ID)
 		if err != nil {
 			return nil, err
 		}
-		return CategoriesResponse{Categories: categories},nil
+		return ProductsResponse{Products: products},nil
 	}
 }
 func MakeGetByIDEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(GetByIDRequest)
-		group,err:=svc.GetByID(ctx, req.ID)
+		category,err:=svc.GetByID(ctx,req.ID)
 		if err != nil {
 			return nil, err
 		}
-		return GetByIDResponse{Group: group},nil
+		return GetByIDResponse{Category: category},nil
+	}
+}
+
+func MakeGetByGroupIDEndpoint(svc service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req:=request.(GetByGroupIDRequest)
+		categories,err:=svc.GetByGroupID(ctx,req.ID)
+		if err != nil {
+			return nil, err
+		}
+		return GetByGroupIDResponse{Categories: categories},nil
 	}
 }

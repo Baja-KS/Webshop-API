@@ -4,6 +4,7 @@ import (
 	"GroupService/internal/database"
 	"context"
 	"gorm.io/gorm"
+	"os"
 )
 
 //GroupService should implement the Service interface
@@ -65,12 +66,20 @@ func (g *GroupService) Delete(ctx context.Context, id uint) (string, error) {
 }
 
 func (g *GroupService) Categories(ctx context.Context, id uint) ([]database.CategoryOut, error) {
-	panic("implement me")
+	categories,err:=database.GetCategories(id,os.Getenv("CATEGORY_SERVICE"))
+	if err != nil {
+		return categories,err
+	}
+	return categories,nil
 }
 
 func (g *GroupService) GetByID(ctx context.Context, id uint) (database.GroupOut, error) {
 	var group database.Group
-	g.DB.Where("id = ?",id).First(&group)
+	notFound:=g.DB.Where("id = ?",id).First(&group).Error
+	if notFound != nil {
+		return group.Out(), notFound
+	}
+
 	return group.Out(),nil
 }
 

@@ -4,3 +4,7 @@ AuthenticationService/vendor
 GroupService/.idea
 GroupService/vendor
 GroupService/.env
+
+CategoryService/.idea
+CategoryService/vendor
+CategoryService/.env
