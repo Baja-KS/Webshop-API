@@ -8,3 +8,7 @@ GroupService/.env
 CategoryService/.idea
 CategoryService/vendor
 CategoryService/.env
+
+ProductService/.idea
+ProductService/vendor
+ProductService/.env
