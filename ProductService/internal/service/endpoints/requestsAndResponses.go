@@ -86,6 +86,8 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 		} else {
 			request.MinPrice=-1
 		}
+	} else {
+		request.MinPrice=-1
 	}
 	if maxPriceParam!="" {
 		price,err:=strconv.ParseFloat(maxPriceParam,32)
@@ -94,6 +96,8 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 		} else {
 			request.MaxPrice=-1
 		}
+	}  else {
+		request.MaxPrice=-1
 	}
 	if categoryParam!=""{
 		category,err:=strconv.ParseUint(r.FormValue("CategoryID"),10,32)
@@ -102,6 +106,8 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 		} else {
 			request.CategoryID=0
 		}
+	}else {
+		request.CategoryID=0
 	}
 	return request,nil
 }

@@ -41,7 +41,9 @@ func (p *ProductService) GetByID(ctx context.Context, id uint) (database.Product
 
 func (p *ProductService) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) ([]database.ProductOut, error) {
 	var products []database.Product
-	result:=p.DB.Where("cast(id as varchar) like ?","%"+search+"%").Or("name like ?","%"+search+"%")
+	result:=p.DB.Where(
+		p.DB.Where("cast(id as varchar) like ?","%"+search+"%").Or("name like ?","%"+search+"%"),
+	)
 	if minPrice != -1 {
 		result=result.Where("price >= ?",minPrice)
 	}
