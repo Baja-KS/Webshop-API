@@ -12,3 +12,7 @@ CategoryService/.env
 ProductService/.idea
 ProductService/vendor
 ProductService/.env
+
+OrderService/.idea
+OrderService/vendor
+OrderService/.env

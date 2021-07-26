@@ -40,7 +40,7 @@ func main() {
 	},[]string{"method","product_id","error"})
 
 	var svc service.Service
-	svc= &middlewares.LoggingMiddleware{Logger: logger, Next: &service.ProductService{DB: db}}
+	svc= &service.ProductService{DB: db}
 	svc=&middlewares.AuthenticationMiddleware{Next: svc}
 	svc=&middlewares.LoggingMiddleware{Logger: logger,Next: svc}
 	svc=&middlewares.InstrumentingMiddleware{
