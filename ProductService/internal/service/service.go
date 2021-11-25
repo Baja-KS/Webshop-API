@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 //ProductService should implement the Service interface
@@ -27,7 +28,7 @@ func ValidateCategory(categoryServiceURL string, id uint) bool {
 
 type Service interface {
 	GetByID(ctx context.Context,id uint) (database.ProductOut,error)
-	Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) ([]database.ProductOut, error)
+	Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) ([]database.ProductOut, error)
 	Create(ctx context.Context,data database.ProductIn) (string,error)
 	Update(ctx context.Context,id uint,data database.ProductIn) (string,error)
 	Delete(ctx context.Context,id uint) (string,error)
@@ -39,10 +40,13 @@ func (p *ProductService) GetByID(ctx context.Context, id uint) (database.Product
 	return product.Out(),nil
 }
 
-func (p *ProductService) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) ([]database.ProductOut, error) {
+func (p *ProductService) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) ([]database.ProductOut, error) {
 	var products []database.Product
+
+
+
 	result:=p.DB.Where(
-		p.DB.Where("cast(id as varchar) like ?","%"+search+"%").Or("name like ?","%"+search+"%"),
+		p.DB.Where("cast(id as varchar) ilike ?","%"+search+"%").Or("name ilike ?","%"+search+"%"),
 	)
 	if minPrice != -1 {
 		result=result.Where("price >= ?",minPrice)
@@ -55,6 +59,12 @@ func (p *ProductService) Search(ctx context.Context, search string, category uin
 	}
 	if discount  {
 		result=result.Where("discount > ?","0")
+	}
+	if len(sortName)>0 {
+		result=result.Order("name "+strings.ToLower(sortName))
+	}
+	if len(sortPrice) > 0 {
+		result=result.Order("price "+strings.ToLower(sortPrice))
 	}
 	if result.Debug().Find(&products).Error != nil {
 		return database.ProductArrayOut(products),result.Error

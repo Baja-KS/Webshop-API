@@ -4,20 +4,9 @@ import (
 	"OrderService/internal/service"
 	"context"
 	"github.com/go-kit/kit/endpoint"
-	"github.com/gorilla/mux"
-	"net/http"
-	"strconv"
 )
 
-func ParseIDFromURL(r *http.Request) (uint, error) {
-	params:=mux.Vars(r)
-	idStr:=params["id"]
-	id,err:=strconv.ParseUint(idStr,10,32)
-	if err != nil {
-		return 0,err
-	}
-	return uint(id),nil
-}
+
 
 type EndpointSet struct {
 	GetByIDEndpoint endpoint.Endpoint
@@ -42,11 +31,11 @@ func NewEndpointSet(svc service.Service) EndpointSet {
 func MakeGetByIDEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(GetByIDRequest)
-		order,err:=svc.GetByID(ctx,req.ID)
+		items,err:=svc.GetByID(ctx,req.ID)
 		if err != nil {
 			return nil, err
 		}
-		return GetByIDResponse{Order: order},nil
+		return GetByIDResponse{OrderItems: items},nil
 	}
 }
 func MakeSearchEndpoint(svc service.Service) endpoint.Endpoint {

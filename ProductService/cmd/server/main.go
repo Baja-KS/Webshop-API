@@ -9,6 +9,7 @@ import (
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/cors"
 	"net/http"
 	"os"
 )
@@ -50,7 +51,7 @@ func main() {
 	}
 
 	ep:=endpoints.NewEndpointSet(svc)
-	err = http.ListenAndServe(":8080", transport.NewHTTPHandler(ep))
+	err = http.ListenAndServe(":8080", cors.AllowAll().Handler(transport.NewHTTPHandler(ep)))
 	if err != nil {
 		log.With(logger,"err",err)
 	}

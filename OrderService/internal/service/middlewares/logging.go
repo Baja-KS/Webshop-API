@@ -15,9 +15,9 @@ type LoggingMiddleware struct {
 	Next   service.Service
 }
 
-func (l *LoggingMiddleware) GetByID(ctx context.Context, id uint) (order database.OrderOut,err error) {
+func (l *LoggingMiddleware) GetByID(ctx context.Context, id uint) (order []database.OrderItemOut, err error) {
 	defer func(begin time.Time) {
-		err := l.Logger.Log("method", "get by id", "id",id ,"name", order.FirstName+" "+order.LastName,"err", err, "took", time.Since(begin))
+		err := l.Logger.Log("method", "get by id", "id",id ,"err", err, "took", time.Since(begin))
 		if err != nil {
 			return
 		}
@@ -70,7 +70,7 @@ func (l *LoggingMiddleware) Total(ctx context.Context) (total float32,err error)
 	return
 }
 
-func (l *LoggingMiddleware) Top(ctx context.Context, count uint) (products []database.ProductOut,err error) {
+func (l *LoggingMiddleware) Top(ctx context.Context, count uint) (products []database.ProductOutTop, err error) {
 	defer func(begin time.Time) {
 		err := l.Logger.Log("method", "top", "products", len(products),"err", err, "took", time.Since(begin))
 		if err != nil {

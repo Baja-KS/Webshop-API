@@ -26,13 +26,13 @@ func (i *InstrumentingMiddleware) GetByID(ctx context.Context, id uint) (product
 	return
 }
 
-func (i *InstrumentingMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) (products []database.ProductOut,err error) {
+func (i *InstrumentingMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) (products []database.ProductOut, err error) {
 	defer func(begin time.Time) {
 		lvs:=[]string{"method","Search","product_id", "none","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
-	products,err=i.Next.Search(ctx,search,category,minPrice,maxPrice,discount)
+	products,err=i.Next.Search(ctx, search, category, minPrice, maxPrice, discount, sortName, sortPrice)
 	return
 }
 

@@ -34,6 +34,8 @@ type SearchRequest struct {
 	MaxPrice float32 `json:"maxPrice"`
 	Discount bool `json:"discount"`
 	CategoryID uint `json:"CategoryID"`
+	SortName string `json:"sortName"`
+	SortPrice string `json:"sortPrice"`
 }
 
 type SearchResponse struct {
@@ -78,7 +80,9 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 	request.Discount = r.URL.Query().Get("withDiscount") == "true"
 	minPriceParam:=r.URL.Query().Get("minPrice")
 	maxPriceParam:=r.URL.Query().Get("maxPrice")
-	categoryParam:=r.URL.Query().Get("CategoryID")
+	categoryParam:=r.URL.Query().Get("CategoryId")
+	sortNameParam:=r.URL.Query().Get("sortName")
+	sortPriceParam:=r.URL.Query().Get("sortPrice")
 	if minPriceParam!="" {
 		price,err:=strconv.ParseFloat(minPriceParam,32)
 		if err == nil {
@@ -100,7 +104,7 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 		request.MaxPrice=-1
 	}
 	if categoryParam!=""{
-		category,err:=strconv.ParseUint(r.FormValue("CategoryID"),10,32)
+		category,err:=strconv.ParseUint(categoryParam,10,32)
 		if err == nil {
 			request.CategoryID=uint(category)
 		} else {
@@ -109,6 +113,9 @@ func DecodeSearchRequest(ctx context.Context, r *http.Request) (interface{}, err
 	}else {
 		request.CategoryID=0
 	}
+	request.SortName=sortNameParam
+	request.SortPrice=sortPriceParam
+	//request.Sort=sortParam
 	return request,nil
 }
 func DecodeCreateRequest(ctx context.Context, r *http.Request) (interface{}, error) {

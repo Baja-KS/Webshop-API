@@ -37,7 +37,7 @@ func MakeGetByIDEndpoint(svc service.Service) endpoint.Endpoint {
 func MakeSearchEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
         req:=request.(SearchRequest)
-		products,err:=svc.Search(ctx,req.Search,req.CategoryID,req.MinPrice,req.MaxPrice,req.Discount)
+		products,err:=svc.Search(ctx, req.Search, req.CategoryID, req.MinPrice, req.MaxPrice, req.Discount, req.SortName, req.SortPrice)
 		if err != nil {
 			return nil, err
 		}

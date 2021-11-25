@@ -99,10 +99,7 @@ func DecodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, err
 }
 func DecodeDeleteRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteRequest
-	err:=json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		return nil, err
-	}
+
 	id,err:=ParseIDFromURL(r)
 	if err != nil {
 		return request,err

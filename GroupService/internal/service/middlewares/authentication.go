@@ -33,7 +33,7 @@ type AuthenticationMiddleware struct {
 	Next service.Service
 }
 
-func (a *AuthenticationMiddleware) GetAll(ctx context.Context) ([]database.GroupOut, error) {
+func (a *AuthenticationMiddleware) GetAll(ctx context.Context) ([]database.GroupOutWithCategories, error) {
 	return a.Next.GetAll(ctx)
 }
 

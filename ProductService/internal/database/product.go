@@ -1,11 +1,14 @@
 package database
 
 import (
+	"bytes"
 	"gorm.io/gorm"
 	"io"
 	"math/rand"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 )
@@ -37,7 +40,7 @@ type ProductIn struct {
 	Img string `json:"img,omitempty"`
 	Price float32 `json:"price"`
 	Discount int `json:"discount"`
-	CategoryID uint `json:"categoryID"`
+	CategoryID uint `json:"CategoryId"`
 }
 
 type ProductOut struct {
@@ -47,7 +50,8 @@ type ProductOut struct {
 	Img string `json:"img,omitempty"`
 	Price float32 `json:"price"`
 	Discount int `json:"discount"`
-	CategoryID uint `json:"categoryID"`
+	CategoryID uint `json:"CategoryId"`
+	Deletable bool `json:"deletable"`
 }
 
 func (p *Product) Out() ProductOut {
@@ -59,7 +63,12 @@ func (p *Product) Out() ProductOut {
 		Price:       p.Price,
 		Discount:    p.Discount,
 		CategoryID:  p.CategoryID,
+		Deletable: p.IsDeletable(),
 	}
+}
+
+func (p *Product) IsDeletable() bool {
+	return false
 }
 
 func (i *ProductIn) In() Product {
@@ -96,9 +105,43 @@ func (p *Product) Update(data ProductIn) Product {
 	return updated
 }
 
+func UploadImage(file *multipart.File,authHeader string,imgName string) error {
+	var reqBody bytes.Buffer
+	multiPartWriter:=multipart.NewWriter(&reqBody)
+	fileWriter,err:=multiPartWriter.CreateFormFile("img",imgName)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(fileWriter, *file)
+	if err != nil {
+		return err
+	}
+
+	_=multiPartWriter.Close()
+
+	req,err:=http.NewRequest("POST",os.Getenv("IMG_SERVICE"),&reqBody)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type",multiPartWriter.FormDataContentType())
+	req.Header.Set("Authorization",authHeader)
+
+	client:=&http.Client{}
+	_, err = client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func DecodeMultipartRequest(r *http.Request) (ProductIn,error) {
 	err:=r.ParseMultipartForm(32<<20)
 	if err != nil {
+		//logger.Log("status","successn't","place","Parse-Multipart-Form","err",err)
 		return ProductIn{}, err
 	}
 	//text fields
@@ -108,9 +151,9 @@ func DecodeMultipartRequest(r *http.Request) (ProductIn,error) {
 	}
 	discount,err:=strconv.Atoi(r.FormValue("discount"))
 	if err != nil {
-		return ProductIn{}, err
+		discount=0
 	}
-	category,err:=strconv.ParseUint(r.FormValue("CategoryID"),10,32)
+	category,err:=strconv.ParseUint(r.FormValue("CategoryId"),10,32)
 	if err != nil {
 		return ProductIn{}, err
 	}
@@ -121,24 +164,25 @@ func DecodeMultipartRequest(r *http.Request) (ProductIn,error) {
 		Discount:    discount,
 		CategoryID:  uint(category),
 	}
-	file, _,err:=r.FormFile("img")
-	if err != nil {
+	file, hdr,err:=r.FormFile("img")
+	if file == nil || err != nil {
 		return data, nil
 	}
+
+	imgName:=RandomString(16)+filepath.Ext(hdr.Filename)
+
+	err = UploadImage(&file,r.Header["Authorization"][0],imgName)
+	if err != nil {
+		_ = file.Close()
+		return data, err
+	}
+
+
 	err = file.Close()
 	if err != nil {
 		return data, err
 	}
-	imgName:=RandomString(16)
-	f,err:=os.OpenFile("../../resources/img/"+imgName,os.O_WRONLY|os.O_CREATE,0777)
-	if err != nil {
-		return data, err
-	}
-	_, err = io.Copy(f,file)
-	err=f.Close()
-	if err != nil {
-		return data, err
-	}
+
 	data.Img=imgName
 	return data,nil
 }

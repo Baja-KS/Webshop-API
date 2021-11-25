@@ -26,14 +26,14 @@ func (l *LoggingMiddleware) GetByID(ctx context.Context, id uint) (product datab
 	return
 }
 
-func (l *LoggingMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) (products []database.ProductOut,err error) {
+func (l *LoggingMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) (products []database.ProductOut, err error) {
 	defer func(begin time.Time) {
 		err := l.Logger.Log("method", "search", "products", len(products),"err", err, "took", time.Since(begin))
 		if err != nil {
 			return
 		}
 	}(time.Now())
-	products,err=l.Next.Search(ctx,search,category,minPrice,maxPrice,discount)
+	products,err=l.Next.Search(ctx, search, category, minPrice, maxPrice, discount, sortName, sortPrice)
 	return
 }
 

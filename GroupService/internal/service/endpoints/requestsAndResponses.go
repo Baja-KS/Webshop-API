@@ -24,7 +24,7 @@ type GetAllRequest struct {
 }
 
 type GetAllResponse struct {
-	Groups []database.GroupOut `json:"groups"`
+	Groups []database.GroupOutWithCategories `json:"groups"`
 }
 type CreateRequest struct {
 	Input database.GroupIn `json:"input"`
@@ -94,11 +94,6 @@ func DecodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, err
 }
 func DecodeDeleteRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteRequest
-	err:=json.NewDecoder(r.Body).Decode(&request)
-
-	if err != nil {
-		return request,err
-	}
 
 	id,err:=ParseIDFromURL(r)
 	if err != nil {

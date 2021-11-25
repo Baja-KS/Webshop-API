@@ -16,12 +16,13 @@ type InstrumentingMiddleware struct {
 	Next           service.Service
 }
 
-func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (groups []database.GroupOut,err error) {
+func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (groups []database.GroupOutWithCategories,err error) {
 	defer func(begin time.Time) {
 		lvs:=[]string{"method","GetAll","group_id", "none","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
+
 	groups,err=i.Next.GetAll(ctx)
 	return
 }

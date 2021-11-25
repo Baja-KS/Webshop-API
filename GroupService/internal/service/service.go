@@ -15,13 +15,13 @@ type GroupService struct {
 	DB *gorm.DB
 }
 
-func (g *GroupService) GetAll(context.Context) ([]database.GroupOut, error) {
+func (g *GroupService) GetAll(context.Context) ([]database.GroupOutWithCategories, error) {
 	var groups []database.Group
 	result:=g.DB.Find(&groups)
 	if result.Error != nil {
-		return database.GroupArrayOut(groups), result.Error
+		return database.GroupArrayOutWithCategories(groups), result.Error
 	}
-	out:=database.GroupArrayOut(groups)
+	out:=database.GroupArrayOutWithCategories(groups)
 	return out,nil
 }
 
@@ -58,10 +58,12 @@ func (g *GroupService) Delete(ctx context.Context, id uint) (string, error) {
 	if notFound != nil {
 		return "That group doesn't exist", notFound
 	}
-	err:=g.DB.Delete(&database.Group{},id).Error
+
+	err:=g.DB.Delete(&group).Error
 	if err != nil {
 		return "Error deleting group", err
 	}
+
 	return "Group successfully deleted", nil
 }
 
@@ -84,7 +86,7 @@ func (g *GroupService) GetByID(ctx context.Context, id uint) (database.GroupOut,
 }
 
 type Service interface {
-	GetAll(ctx context.Context) ([]database.GroupOut, error)
+	GetAll(ctx context.Context) ([]database.GroupOutWithCategories, error)
 	Create(ctx context.Context, data database.GroupIn) (string, error)
 	Update(ctx context.Context, id uint, data database.GroupIn) (string, error)
 	Delete(ctx context.Context, id uint) (string, error)

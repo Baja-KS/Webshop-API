@@ -4,17 +4,29 @@ import (
 	"OrderService/internal/database"
 	"context"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 	"time"
 )
+
+
+func ParseIDFromURL(r *http.Request) (uint, error) {
+	params:=mux.Vars(r)
+	idStr:=params["id"]
+	id,err:=strconv.ParseUint(idStr,10,32)
+	if err != nil {
+		return 0,err
+	}
+	return uint(id),nil
+}
 
 type GetByIDRequest struct {
 	ID uint `json:"id,omitempty"`
 }
 
 type GetByIDResponse struct {
-	Order database.OrderOut `json:"order"`
+	OrderItems []database.OrderItemOut `json:"orderItems"`
 }
 type SearchRequest struct {
 	Search string `json:"search"`
@@ -51,7 +63,7 @@ type TopRequest struct {
 }
 
 type TopResponse struct {
-	Products []database.ProductOut `json:"products"`
+	Products []database.ProductOutTop `json:"products"`
 }
 
 

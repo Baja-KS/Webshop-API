@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  app:
+    build: .
+    container_name: "galactic-trade-img-service"
+    command: ["npm","start"]
+    volumes:
+      - resources:/app/resources
+    environment:
+      - NODE_ENV=$NODE_ENV
+      - AUTH_SERVICE=$AUTH_SERVICE
+    ports:
+      - $PORT:3000
+    restart: always
+
+
+volumes:
+  resources:
+
+
+
+

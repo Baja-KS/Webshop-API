@@ -1,6 +1,9 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"os"
+)
 
 type Group struct {
 	gorm.Model
@@ -14,6 +17,25 @@ func (g *Group) Out() GroupOut {
 		ID:          g.ID,
 		Name:        g.Name,
 		Description: g.Description,
+	}
+}
+
+func (g *Group) OutWithCategories() GroupOutWithCategories {
+	var categories []CategoryOut
+	categories,err:=GetCategories(g.ID,os.Getenv("CATEGORY_SERVICE"))
+	if err != nil {
+		return GroupOutWithCategories{
+			ID:          g.ID,
+			Name:        g.Name,
+			Description: g.Description,
+			Categories:  nil,
+		}
+	}
+	return GroupOutWithCategories{
+		ID:          g.ID,
+		Name:        g.Name,
+		Description: g.Description,
+		Categories:  categories,
 	}
 }
 
@@ -32,6 +54,14 @@ func GroupArrayOut(groupModels []Group) []GroupOut {
 	return outArr
 }
 
+func GroupArrayOutWithCategories(groupModels []Group) []GroupOutWithCategories {
+	outArr:=make([]GroupOutWithCategories,len(groupModels))
+	for i, group := range groupModels {
+		outArr[i]=group.OutWithCategories()
+	}
+	return outArr
+}
+
 type GroupIn struct {
 	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
@@ -42,5 +72,13 @@ type GroupOut struct {
 	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
 }
+
+type GroupOutWithCategories struct {
+	ID uint `json:"id,omitempty"`
+	Name string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Categories []CategoryOut `json:"Categories"`
+}
+
 
 

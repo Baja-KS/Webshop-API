@@ -36,8 +36,8 @@ func (a *AuthenticationMiddleware) GetByID(ctx context.Context, id uint) (databa
 	return a.Next.GetByID(ctx,id)
 }
 
-func (a *AuthenticationMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool) ([]database.ProductOut, error) {
-	return a.Next.Search(ctx,search,category,minPrice,maxPrice,discount)
+func (a *AuthenticationMiddleware) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) ([]database.ProductOut, error) {
+	return a.Next.Search(ctx, search, category, minPrice, maxPrice, discount, sortName, sortPrice)
 }
 
 func (a *AuthenticationMiddleware) Create(ctx context.Context, data database.ProductIn) (string, error) {

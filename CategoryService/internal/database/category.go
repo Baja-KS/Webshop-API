@@ -1,8 +1,12 @@
 package database
 
 import (
+	"encoding/json"
 	"gorm.io/gorm"
+	"net/http"
+	"os"
 	"reflect"
+	"strconv"
 )
 
 
@@ -17,16 +21,57 @@ type Category struct {
 type CategoryIn struct {
 	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
-	GroupID uint `json:"groupID"`
+	GroupID uint `json:"GroupId"`
 }
 
 type CategoryOut struct {
 	ID uint `json:"id"`
 	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
-	GroupID uint `json:"groupID"`
+	GroupID uint `json:"GroupId"`
+	Deletable bool `json:"deletable"`
 }
 
+//func GetCategories(GroupID uint,categoryServiceURL string) ([]CategoryOut,error) {
+//
+//	var categories []CategoryOut
+//	var response CategoryServiceResponse
+//	res,err:=http.Get(categoryServiceURL+"/GetByGroupID/"+ strconv.Itoa(int(GroupID)))
+//	if err != nil {
+//		return categories,err
+//	}
+//	err=json.NewDecoder(res.Body).Decode(&response)
+//	if err != nil {
+//		return categories,err
+//	}
+//	return response.Categories,nil
+//}
+
+type ProductServiceResponse struct {
+	Products []ProductOut `json:"products"`
+}
+
+func (c *Category) GetProducts(productServiceURL string) ([]ProductOut, error) {
+	var products []ProductOut
+	var response ProductServiceResponse
+	res,err:=http.Get(productServiceURL+"/Search?CategoryId="+strconv.Itoa(int(c.ID)))
+	if err != nil {
+		return products,err
+	}
+	err=json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return products,err
+	}
+	return response.Products,nil
+}
+
+func (c *Category) IsDeletable() bool {
+	products,err:=c.GetProducts(os.Getenv("PRODUCT_SERVICE"))
+	if err != nil {
+		return false
+	}
+	return len(products)==0
+}
 
 func (c *Category) Out() CategoryOut {
 	return CategoryOut{
@@ -34,6 +79,7 @@ func (c *Category) Out() CategoryOut {
 		Name:        c.Name,
 		Description: c.Description,
 		GroupID:     c.GroupID,
+		Deletable: c.IsDeletable(),
 	}
 }
 

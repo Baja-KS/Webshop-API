@@ -29,6 +29,7 @@ services:
       - JWT_KEY=$JWT_KEY
       - AUTH_SERVICE=$AUTH_SERVICE
       - GROUP_SERVICE=$GROUP_SERVICE
+      - PRODUCT_SERVICE=$PRODUCT_SERVICE
     ports:
       - "8082:8080"
     depends_on:

@@ -29,6 +29,7 @@ services:
       - JWT_KEY=$JWT_KEY
       - AUTH_SERVICE=$AUTH_SERVICE
       - CATEGORY_SERVICE=$CATEGORY_SERVICE
+      - IMG_SERVICE=$IMG_SERVICE
     ports:
       - "8083:8080"
     depends_on:

@@ -1,33 +1,65 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+	"gorm.io/gorm"
+	"net/http"
+	"os"
+	"strconv"
+)
 
 type OrderItem struct {
 	gorm.Model
 	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Count uint `gorm:"default:1" json:"count"`
-	OrderID uint `gorm:"not null" json:"orderID"`
-	ProductID uint `gorm:"not null" json:"productID"`
+	OrderID uint `gorm:"not null" json:"OrderId"`
+	ProductID uint `gorm:"not null" json:"ProductId"`
 }
 
 type OrderItemIn struct {
 	Count uint `json:"count"`
-	ProductID uint `json:"productID"`
+	ProductID uint `json:"ProductId"`
 }
 
 type OrderItemOut struct {
 	ID uint `json:"id,omitempty"`
 	Count uint `json:"count"`
-	OrderID uint `json:"orderID"`
-	ProductID uint `json:"productID"`
+	OrderID uint `json:"OrderId"`
+	ProductID uint `json:"ProductId"`
+	Product ProductOut `json:"Product"`
+}
+
+
+func (i *OrderItem) GetProduct(productServiceUrl string) (ProductOut,error) {
+	var product ProductOut
+	var response ProductServiceResponse
+	res,err:=http.Get(productServiceUrl+"/GetByID/"+strconv.Itoa(int(i.ProductID)))
+	if err != nil {
+		return product,err
+	}
+	err=json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return product,err
+	}
+	return response.Product,nil
+}
+
+func (i *OrderItem) GetValue() float32 {
+	product,err:=i.GetProduct(os.Getenv("PRODUCT_SERVICE"))
+	if err != nil {
+		return 0
+	}
+	return product.Price*float32(i.Count)
 }
 
 func (i *OrderItem) Out() OrderItemOut {
+	product,_:=i.GetProduct(os.Getenv("PRODUCT_SERVICE"))
 	return OrderItemOut{
 		ID:        i.ID,
 		Count:     i.Count,
 		OrderID:   i.OrderID,
 		ProductID: i.ProductID,
+		Product: product,
 	}
 }
 

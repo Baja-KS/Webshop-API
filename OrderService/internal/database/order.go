@@ -16,7 +16,7 @@ type Order struct {
 	PaymentMethod string `gorm:"not null" json:"paymentMethod"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt,omitempty"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
-	OrderItems []OrderItem `json:"orderItems"`
+	OrderItems []OrderItem `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"orderItems"`
 }
 
 type OrderIn struct {
@@ -26,7 +26,7 @@ type OrderIn struct {
 	Address string `json:"address"`
 	City string `json:"city"`
 	PaymentMethod string `json:"paymentMethod"`
-	OrderItems []OrderItemIn `json:"orderItems"`
+	OrderItems []OrderItemIn `json:"items"`
 }
 
 type OrderOut struct {
@@ -39,7 +39,25 @@ type OrderOut struct {
 	PaymentMethod string `json:"paymentMethod"`
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
-	OrderItems []OrderItemOut `json:"orderItems"`
+	Total float32 `json:"total"`
+}
+
+func (o *Order) GetTotalValue() float32 {
+	var total float32
+	total=0
+	for _, item := range o.OrderItems {
+		total+=item.GetValue()
+	}
+	return total
+}
+
+func GetTotalValue(orders []Order) float32 {
+	var total float32
+	total=0
+	for _, order := range orders {
+		total+=order.GetTotalValue()
+	}
+	return total
 }
 
 func (o *Order) Out() OrderOut {
@@ -51,7 +69,9 @@ func (o *Order) Out() OrderOut {
 		Address:       o.Address,
 		City:          o.City,
 		PaymentMethod: o.PaymentMethod,
-		OrderItems:    ItemArrayOut(o.OrderItems),
+		CreatedAt: o.CreatedAt,
+		UpdatedAt: o.UpdatedAt,
+		Total: o.GetTotalValue(),
 	}
 }
 
@@ -74,4 +94,5 @@ func OrderArrayOut(models []Order) []OrderOut {
 	}
 	return outArr
 }
+
 

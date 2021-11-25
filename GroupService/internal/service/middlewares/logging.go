@@ -15,7 +15,7 @@ type LoggingMiddleware struct {
 	Next   service.Service
 }
 
-func (l *LoggingMiddleware) GetAll(ctx context.Context) (groups []database.GroupOut,err error) {
+func (l *LoggingMiddleware) GetAll(ctx context.Context) (groups []database.GroupOutWithCategories,err error) {
 	defer func(begin time.Time) {
 		err := l.Logger.Log("method", "getall", "groups", len(groups),"err", err, "took", time.Since(begin))
 		if err != nil {

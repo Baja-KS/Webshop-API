@@ -6,6 +6,7 @@ import (
 	"errors"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strings"
 )
@@ -46,8 +47,8 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	router.Handle("/Create",CreateHandler).Methods(http.MethodPost)
 	router.Handle("/Update/{id}",UpdateHandler).Methods(http.MethodPut)
 	router.Handle("/Delete/{id}",DeleteHandler).Methods(http.MethodDelete)
+	router.Handle("/metrics",promhttp.Handler()).Methods(http.MethodGet)
 
-	router.Handle("/Img",http.FileServer(http.Dir("../../../resources/img/")))
 
 
 	return router

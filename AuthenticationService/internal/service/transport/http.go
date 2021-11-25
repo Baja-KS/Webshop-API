@@ -15,10 +15,10 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	registerHandler:=httptransport.NewServer(ep.RegisterEndpoint,endpoints.DecodeRegisterRequest,endpoints.EncodeResponse)
 	getAllHandler:=httptransport.NewServer(ep.GetAllEndpoint,endpoints.DecodeGetAllRequest,endpoints.EncodeResponse)
 	authUserHandler:=httptransport.NewServer(ep.AuthUserEndpoint,endpoints.DecodeAuthUserRequest,endpoints.EncodeResponse)
-	router.Handle("/auth/login",loginHandler).Methods(http.MethodPost)
-	router.Handle("/auth/register",registerHandler).Methods(http.MethodPost)
-	router.Handle("/user/getAll",getAllHandler).Methods(http.MethodGet)
-	router.Handle("/auth/user",authUserHandler).Methods(http.MethodGet)
+	router.Handle("/Login",loginHandler).Methods(http.MethodPost)
+	router.Handle("/Register",registerHandler).Methods(http.MethodPost)
+	router.Handle("/GetAll",getAllHandler).Methods(http.MethodGet)
+	router.Handle("/User",authUserHandler).Methods(http.MethodGet)
 	router.Handle("/metrics",promhttp.Handler()).Methods(http.MethodGet)
 
 	return router

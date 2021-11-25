@@ -10,6 +10,8 @@ type CategoryOut struct {
 	ID uint `json:"id,omitempty"`
 	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
+	GroupID uint `json:"GroupId"`
+	Deletable bool `json:"deletable"`
 }
 
 type CategoryServiceResponse struct {
