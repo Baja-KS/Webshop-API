@@ -14,21 +14,6 @@ import (
 	"os"
 )
 
-type App struct {
-	Name string
-	Version string
-}
-
-//func (app *App) Run() error {
-//	log.SetFormatter(&log.JSONFormatter{})
-//	log.WithFields(log.Fields{
-//		"AppName":app.Name,
-//		"AppVersion":app.Version,
-//	}).Info("Setting up the api")
-//
-//
-//}
-
 func main() {
 	logger:=log.NewLogfmtLogger(os.Stderr)
 	var err error

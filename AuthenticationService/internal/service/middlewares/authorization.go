@@ -22,7 +22,7 @@ func (a *AuthorizationMiddleware) Login(ctx context.Context, username string, pa
 }
 
 func (a *AuthorizationMiddleware) Register(ctx context.Context, user database.UserIn) (string, error) {
-	if !!database.AuthorizeUser(ctx,a.DB,AuthorizeAdmin)  {
+	if !database.AuthorizeUser(ctx,a.DB,AuthorizeAdmin)  {
 		return "Unauthorized",errors.New("unauthorized")
 	}
 	return a.Next.Register(ctx,user)
