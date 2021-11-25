@@ -40,7 +40,6 @@ func main() {
 	if err != nil {
 		log.With(logger,"err",err)
 	}
-
 	requestCount:=kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace:   "bajaks_webshop_api",
 		Subsystem:   "authentication_service",
@@ -58,6 +57,8 @@ func main() {
 	//svc=middlewares.LoggingMiddleware{}
 	var svc service.Service
 	svc= &service.AuthenticationService{DB: db}
+	svc= &middlewares.AuthorizationMiddleware{DB: db,Next: svc}
+	svc= &middlewares.AuthenticationMiddleware{DB: db,Next: svc}
 	svc= &middlewares.LoggingMiddleware{Logger: logger, Next: svc}
 	svc= &middlewares.InstrumentingMiddleware{
 		RequestCount: requestCount,

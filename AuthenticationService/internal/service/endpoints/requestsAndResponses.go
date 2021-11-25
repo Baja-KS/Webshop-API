@@ -55,7 +55,7 @@ type GetAllResponse struct {
 }
 
 type AuthUserRequest struct {
-	Token string
+
 }
 
 type AuthUserResponse struct {
@@ -91,10 +91,5 @@ func DecodeGetAllRequest(ctx context.Context, r *http.Request) (interface{}, err
 }
 func DecodeAuthUserRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request AuthUserRequest
-	token,err:=GetAuthToken(r)
-	if err != nil {
-		return request,err
-	}
-	request.Token=token
 	return request,nil
 }

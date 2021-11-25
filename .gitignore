@@ -17,3 +17,4 @@ OrderService/.idea
 OrderService/vendor
 OrderService/.env
 /ImgService/node_modules/
+/AuthenticationService/.env

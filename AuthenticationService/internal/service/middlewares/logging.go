@@ -13,7 +13,7 @@ type LoggingMiddleware struct {
 	Next   service.Service
 }
 
-func (l *LoggingMiddleware) Login(ctx context.Context, username string, password string) (user database.User,token string,err error) {
+func (l *LoggingMiddleware) Login(ctx context.Context, username string, password string) (user database.UserOut, token string, err error) {
 	defer func(begin time.Time) {
 		err := l.Logger.Log("method", "login", "user", user.Fullname,"err", err, "took", time.Since(begin))
 		if err != nil {
@@ -35,7 +35,7 @@ func (l *LoggingMiddleware) Register(ctx context.Context, user database.UserIn) 
 	return
 }
 
-func (l *LoggingMiddleware) GetAll(ctx context.Context) (users []database.User,err error) {
+func (l *LoggingMiddleware) GetAll(ctx context.Context) (users []database.UserOut, err error) {
 	defer func(begin time.Time){
 		err := l.Logger.Log("method", "getall", "err", err, "took", time.Since(begin))
 		if err != nil {
@@ -46,13 +46,13 @@ func (l *LoggingMiddleware) GetAll(ctx context.Context) (users []database.User,e
 	return
 }
 
-func (l *LoggingMiddleware) AuthUser(ctx context.Context, tokenString string) (user database.User, err error) {
+func (l *LoggingMiddleware) AuthUser(ctx context.Context) (user database.UserOut, err error) {
 	defer func(begin time.Time){
 		err := l.Logger.Log("method", "authuser","user",user.Fullname,"err", err, "took", time.Since(begin))
 		if err != nil {
 			return
 		}
 	}(time.Now())
-	user,err=l.Next.AuthUser(ctx, tokenString)
+	user,err=l.Next.AuthUser(ctx)
 	return
 }

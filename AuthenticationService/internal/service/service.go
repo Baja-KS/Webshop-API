@@ -21,33 +21,30 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 type Service interface {
-	Login(ctx context.Context,username string,password string) (database.User,string,error)
+	Login(ctx context.Context, username string, password string) (database.UserOut, string, error)
 	Register(ctx context.Context, user database.UserIn) (string, error)
-	GetAll(ctx context.Context) ([]database.User,error)
-	AuthUser(ctx context.Context, tokenString string) (database.User, error)
+	GetAll(ctx context.Context) ([]database.UserOut, error)
+	AuthUser(ctx context.Context) (database.UserOut, error)
 }
 
 
-func (a *AuthenticationService) Login(ctx context.Context, username string, password string) (database.User, string, error) {
+func (a *AuthenticationService) Login(ctx context.Context, username string, password string) (database.UserOut, string, error) {
 	var userDB database.User
 	err:=a.DB.Where("username = ?",username).First(&userDB).Error
 	if err != nil {
-		return database.User{}, "", err
+		return database.UserOut{}, "", err
 	}
 	if !CheckPasswordHash(password, userDB.Password) {
-		return database.User{}, "Wrong password", nil
+		return database.UserOut{}, "", errors.New("Login failed")
 	}
-	//atClaims:=stdjwt.MapClaims{}
-	//atClaims["authorized"]=true
-	//atClaims["id"]=userDB.ID
 	at:=stdjwt.NewWithClaims(stdjwt.SigningMethodHS256,stdjwt.StandardClaims{
 		Id: strconv.Itoa(int(userDB.ID)),
 	})
 	token,err:=at.SignedString([]byte(os.Getenv("JWT_KEY")))
 	if err != nil {
-		return database.User{}, "", err
+		return database.UserOut{}, "", err
 	}
-	return userDB,token,nil
+	return userDB.Out(), token, nil
 }
 
 func (a *AuthenticationService) Register(ctx context.Context, user database.UserIn) (string, error) {
@@ -69,40 +66,19 @@ func (a *AuthenticationService) Register(ctx context.Context, user database.User
 	return "Register successful",nil
 }
 
-func (a *AuthenticationService) GetAll(ctx context.Context) ([]database.User, error) {
+func (a *AuthenticationService) GetAll(ctx context.Context) ([]database.UserOut, error) {
 
 	var users []database.User
 	result:=a.DB.Find(&users)
 
 	if result.Error != nil {
-		return users,result.Error
+		return database.UserArrayOut(users), result.Error
 	}
-	return users,nil
+	return database.UserArrayOut(users), nil
 }
 
-func (a *AuthenticationService) AuthUser(ctx context.Context, tokenString string) (database.User, error) {
-	//claims:=stdjwt.MapClaims{}
-	parsed,err:=stdjwt.ParseWithClaims(tokenString,&stdjwt.StandardClaims{}, func(token *stdjwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_KEY")),nil
-	})
-	if err != nil {
-		return database.User{}, err
-	}
-	if parsed.Valid {
-		castedClaims:=parsed.Claims.(*stdjwt.StandardClaims)
-		userId:=castedClaims.Id
-		id,err:=strconv.ParseUint(userId,10,64)
-		if err != nil {
-			return database.User{}, err
-		}
-		var userDB database.User
-		notFound:=a.DB.Where("id = ?",id).First(&userDB).Error
-		if notFound != nil {
-			return database.User{}, notFound
-		}
-		return userDB,nil
-	}
-	return database.User{}, errors.New("Not found")
+func (a *AuthenticationService) AuthUser(ctx context.Context) (database.UserOut, error) {
+	return database.GetAuthUser(ctx,a.DB)
 }
 
 type AuthenticationService struct {

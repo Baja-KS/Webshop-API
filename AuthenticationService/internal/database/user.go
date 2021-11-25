@@ -1,8 +1,12 @@
 package database
 
 import (
+	"context"
 	"errors"
+	stdjwt "github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -18,10 +22,10 @@ type User struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
 }
 
-func (u *User) Out() (UserOut,error) {
+func (u *User) Out() UserOut {
 	if u.Username=="" {
 		var emptyUser UserOut
-		return emptyUser,errors.New("Non existent user")
+		return emptyUser
 	}
 	userOut:=UserOut{
 		ID:        u.ID,
@@ -32,7 +36,7 @@ func (u *User) Out() (UserOut,error) {
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
-	return userOut,nil
+	return userOut
 }
 
 type UserIn struct {
@@ -51,4 +55,53 @@ type UserOut struct {
 	IsAdmin bool `json:"isAdmin"`
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+}
+
+func UserArrayOut(models []User) []UserOut {
+	outArr:=make([]UserOut,len(models))
+	for i,item := range models {
+		outArr[i]=item.Out()
+	}
+	return outArr
+}
+
+func GetAuthUser(ctx context.Context, db *gorm.DB) (UserOut, error) {
+	tokenString:=ctx.Value("auth").(string)
+	parsed,err:=stdjwt.ParseWithClaims(tokenString,&stdjwt.StandardClaims{}, func(token *stdjwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_KEY")),nil
+	})
+	if err != nil {
+		return UserOut{}, err
+	}
+	if parsed.Valid {
+		castedClaims:=parsed.Claims.(*stdjwt.StandardClaims)
+		userId:=castedClaims.Id
+		id,err:=strconv.ParseUint(userId,10,64)
+		if err != nil {
+			return UserOut{}, err
+		}
+		var userDB User
+		notFound:=db.Where("id = ?",id).First(&userDB).Error
+		if notFound != nil {
+			return UserOut{}, notFound
+		}
+		return userDB.Out(), nil
+	}
+	return UserOut{}, errors.New("Not found")
+}
+
+type AuthorizationFunction func(UserOut) bool
+
+func AuthenticateUser(ctx context.Context, db *gorm.DB) bool {
+	return AuthorizeUser(ctx,db, func(user UserOut) bool {
+		return user.ID!=0
+	})
+}
+
+func AuthorizeUser(ctx context.Context, db *gorm.DB, fn AuthorizationFunction) bool {
+	user,err:=GetAuthUser(ctx,db)
+	if err != nil {
+		return false
+	}
+	return fn(user)
 }

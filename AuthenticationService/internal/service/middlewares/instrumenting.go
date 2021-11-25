@@ -15,7 +15,7 @@ type InstrumentingMiddleware struct {
 	Next           service.Service
 }
 
-func (i *InstrumentingMiddleware) Login(ctx context.Context, username string, password string) (user database.User,token string,err error) {
+func (i *InstrumentingMiddleware) Login(ctx context.Context, username string, password string) (user database.UserOut, token string, err error) {
 	defer func(begin time.Time) {
 		lvs:=[]string{"method","Login","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
@@ -36,7 +36,7 @@ func (i *InstrumentingMiddleware) Register(ctx context.Context, user database.Us
 	return
 }
 
-func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (users []database.User,err error) {
+func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (users []database.UserOut, err error) {
 	defer func(begin time.Time) {
 		lvs:=[]string{"method","GetAll","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
@@ -46,12 +46,12 @@ func (i *InstrumentingMiddleware) GetAll(ctx context.Context) (users []database.
 	return
 }
 
-func (i *InstrumentingMiddleware) AuthUser(ctx context.Context, tokenString string) (user database.User,err error) {
+func (i *InstrumentingMiddleware) AuthUser(ctx context.Context) (user database.UserOut, err error) {
 	defer func(begin time.Time) {
 		lvs:=[]string{"method","AuthUser","error",fmt.Sprint(err!=nil)}
 		i.RequestCount.With(lvs...).Add(1)
 		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
-	user,err=i.Next.AuthUser(ctx,tokenString)
+	user,err=i.Next.AuthUser(ctx)
 	return
 }

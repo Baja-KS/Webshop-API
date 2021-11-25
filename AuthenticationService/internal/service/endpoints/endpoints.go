@@ -1,9 +1,9 @@
 package endpoints
 
 import (
+	"context"
 	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/database"
 	"github.com/Baja-KS/Webshop-API/AuthenticationService/internal/service"
-	"context"
 	"github.com/go-kit/kit/endpoint"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -104,15 +104,10 @@ func MakeGetAllEndpoint(svc service.Service) endpoint.Endpoint {
 
 func MakeAuthUserEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req:=request.(AuthUserRequest)
-		user,err:=svc.AuthUser(ctx, req.Token)
+		user,err:=svc.AuthUser(ctx)
 		if err != nil {
-			return AuthUserResponse{User: database.UserOut{}},err
+			return AuthUserResponse{User: user},err
 		}
-		userOut,err:=user.Out()
-		if err != nil {
-			return AuthUserResponse{User: userOut},err
-		}
-		return AuthUserResponse{User: userOut},nil
+		return AuthUserResponse{User: user},nil
 	}
 }
