@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-db-config
+
+data:
+  db-url: auth-db-service
+  db-type:  postgres
+  db-ssl-mode:  disable
+  db-port:  5432
+  db-name:  AuthServiceDB
+
