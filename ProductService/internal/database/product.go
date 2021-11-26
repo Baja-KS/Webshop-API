@@ -113,6 +113,7 @@ func ProductArrayOut(models []Product,authHeader string) []ProductOut {
 
 func (p *Product) Update(data ProductIn) Product {
 	updated:=*p
+	oldImg:=p.Img
 	forUpdate:=reflect.ValueOf(data)
 	for i:=0;i<forUpdate.NumField();i++ {
 		field:=forUpdate.Type().Field(i).Name
@@ -122,6 +123,9 @@ func (p *Product) Update(data ProductIn) Product {
 			v.Set(value)
 		}
 
+	}
+	if data.Img=="" || data.Img=="undefined" || data.Img=="null" {
+		updated.Img=oldImg
 	}
 	return updated
 }
@@ -140,7 +144,7 @@ func UploadImage(file *multipart.File,authHeader string,imgName string) error {
 
 	_=multiPartWriter.Close()
 
-	req,err:=http.NewRequest("POST",os.Getenv("IMG_SERVICE"),&reqBody)
+	req,err:=http.NewRequest("POST",os.Getenv("IMG_SERVICE")+"/Upload",&reqBody)
 	if err != nil {
 		return err
 	}
@@ -190,7 +194,7 @@ func DecodeMultipartRequest(r *http.Request) (ProductIn,error) {
 		return data, nil
 	}
 
-	imgName:=RandomString(16)+filepath.Ext(hdr.Filename)
+	imgName:=RandomString(32)+filepath.Ext(hdr.Filename)
 
 	err = UploadImage(&file,r.Header["Authorization"][0],imgName)
 	if err != nil {

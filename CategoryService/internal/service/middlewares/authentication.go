@@ -12,7 +12,7 @@ import (
 
 func CheckAuth(ctx context.Context,authServiceURL string) bool {
 	client:=&http.Client{}
-	req,err:=http.NewRequest("GET",authServiceURL,nil)
+	req,err:=http.NewRequest("GET",authServiceURL+"/User",nil)
 	if err != nil {
 		return false
 	}

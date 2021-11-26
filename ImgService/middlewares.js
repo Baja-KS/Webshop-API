@@ -10,7 +10,7 @@ const authenticated=async function (req,res,next){
     }
 
     try {
-        const response=await got.get(process.env.AUTH_SERVICE,{headers:{"Authorization":authHeader},timeout:{response:2000}});
+        const response=await got.get(process.env.AUTH_SERVICE+"/User",{headers:{"Authorization":authHeader},timeout:{response:2000}});
         if (!JSON.parse(response.body).hasOwnProperty("user") || response.statusCode!==200){
             console.log('Authentication failed!');
             return res.status(403).json({"message":"Unauthorized"});

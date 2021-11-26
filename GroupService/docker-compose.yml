@@ -29,6 +29,7 @@ services:
       - JWT_KEY=$JWT_KEY
       - AUTH_SERVICE=$AUTH_SERVICE
       - CATEGORY_SERVICE=$CATEGORY_SERVICE
+      - SEED_IF_EMPTY=$SEED_IF_EMPTY
     ports:
       - "8081:8080"
     depends_on:
