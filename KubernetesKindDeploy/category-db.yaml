@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: category-db-ss
+  labels:
+    app: category-db
+spec:
+  replicas: 1
+  serviceName: category-db-service  
+  selector:
+    matchLabels:
+      app: category-db
+  volumeClaimTemplates:
+    - metadata:
+        name: category-db-vol
+      spec:
+        accessModes:  [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage:  100Mi  
+
+  template:
+    metadata:
+      labels:
+        app: category-db
+    spec:
+      containers:
+      - name: pgdb
+        image:  postgres:12.1
+        volumeMounts:
+          - name: category-db-vol
+            mountPath:  /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: category-db-secret
+                key: db-user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: category-db-secret
+                key: db-password
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: category-db-config
+                key:  db-name
+
+
+
+
+
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: category-db-service
+spec:
+  selector:
+    app: category-db
+  clusterIP:  None
+  ports:
+    - protocol: TCP
+      port: 5434
+      targetPort: 5432
+

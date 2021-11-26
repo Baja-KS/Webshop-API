@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: group-db-ss
+  labels:
+    app: group-db
+spec:
+  replicas: 1
+  serviceName: group-db-service  
+  selector:
+    matchLabels:
+      app: group-db
+  volumeClaimTemplates:
+    - metadata:
+        name: group-db-vol
+      spec:
+        accessModes:  [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage:  100Mi  
+
+  template:
+    metadata:
+      labels:
+        app: group-db
+    spec:
+      containers:
+      - name: pgdb
+        image:  postgres:12.1
+        volumeMounts:
+          - name: group-db-vol
+            mountPath:  /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: group-db-secret
+                key: db-user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: group-db-secret
+                key: db-password
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-name
+
+
+
+
+
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: group-db-service
+spec:
+  selector:
+    app: group-db
+  clusterIP:  None
+  ports:
+    - protocol: TCP
+      port: 5433
+      targetPort: 5432
+
