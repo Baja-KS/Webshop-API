@@ -15,6 +15,7 @@ type EndpointSet struct {
 	DeleteEndpoint endpoint.Endpoint
 	TotalEndpoint endpoint.Endpoint
 	TopEndpoint endpoint.Endpoint
+	QuantityOrderedEndpoint endpoint.Endpoint
 }
 
 func NewEndpointSet(svc service.Service) EndpointSet {
@@ -25,6 +26,18 @@ func NewEndpointSet(svc service.Service) EndpointSet {
 		DeleteEndpoint:    MakeDeleteEndpoint(svc),
 		TotalEndpoint:    MakeTotalEndpoint(svc),
 		TopEndpoint:    MakeTopEndpoint(svc),
+		QuantityOrderedEndpoint: MakeQuantityOrderedEndpoint(svc),
+	}
+}
+
+func MakeQuantityOrderedEndpoint(svc service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req:=request.(QuantityOrderedRequest)
+		qty,err:=svc.QuantityOrdered(ctx,req.ID)
+		if err != nil {
+			return nil, err
+		}
+		return QuantityOrderedResponse{Quantity: qty},nil
 	}
 }
 

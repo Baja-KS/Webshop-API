@@ -4,6 +4,7 @@ import (
 	"ProductService/internal/database"
 	"context"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"net/http"
 	"os"
@@ -35,14 +36,19 @@ type Service interface {
 }
 
 func (p *ProductService) GetByID(ctx context.Context, id uint) (database.ProductOut, error) {
+	token:=ctx.Value("auth").(string)
+	authHeader:=fmt.Sprintf("Bearer %s",token)
 	var product database.Product
 	p.DB.Where("id = ?",id).First(&product)
-	return product.Out(),nil
+	return product.Out(authHeader),nil
 }
 
 func (p *ProductService) Search(ctx context.Context, search string, category uint, minPrice float32, maxPrice float32, discount bool, sortName string, sortPrice string) ([]database.ProductOut, error) {
 	var products []database.Product
 
+
+	token:=ctx.Value("auth").(string)
+	authHeader:=fmt.Sprintf("Bearer %s",token)
 
 
 	result:=p.DB.Where(
@@ -67,9 +73,9 @@ func (p *ProductService) Search(ctx context.Context, search string, category uin
 		result=result.Order("price "+strings.ToLower(sortPrice))
 	}
 	if result.Debug().Find(&products).Error != nil {
-		return database.ProductArrayOut(products),result.Error
+		return database.ProductArrayOut(products,authHeader),result.Error
 	}
-	out:=database.ProductArrayOut(products)
+	out:=database.ProductArrayOut(products,authHeader)
 	return out,nil
 }
 

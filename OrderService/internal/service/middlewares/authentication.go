@@ -33,6 +33,13 @@ type AuthenticationMiddleware struct {
 	Next service.Service
 }
 
+func (a *AuthenticationMiddleware) QuantityOrdered(ctx context.Context, id uint) (uint, error) {
+	if !CheckAuth(ctx,os.Getenv("AUTH_SERVICE"))  {
+		return 0, errors.New("unauthorized")
+	}
+	return a.Next.QuantityOrdered(ctx,id)
+}
+
 func (a *AuthenticationMiddleware) GetByID(ctx context.Context, id uint) ([]database.OrderItemOut, error) {
 	if !CheckAuth(ctx,os.Getenv("AUTH_SERVICE"))  {
 		return nil, errors.New("unauthorized")

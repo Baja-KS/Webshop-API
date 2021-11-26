@@ -16,6 +16,15 @@ type InstrumentingMiddleware struct {
 	Next           service.Service
 }
 
+func (i *InstrumentingMiddleware) QuantityOrdered(ctx context.Context, id uint) (qty uint,err error) {
+	defer func(begin time.Time) {
+		lvs:=[]string{"method","QuantityOrdered","order_id", "none","error",fmt.Sprint(err!=nil)}
+		i.RequestCount.With(lvs...).Add(1)
+		i.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
+	}(time.Now())
+	qty,err=i.Next.QuantityOrdered(ctx,id)
+	return
+}
 
 func (i *InstrumentingMiddleware) GetByID(ctx context.Context, id uint) (order []database.OrderItemOut, err error) {
 	defer func(begin time.Time) {

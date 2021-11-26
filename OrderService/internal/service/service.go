@@ -34,6 +34,21 @@ type Service interface {
 	Delete(ctx context.Context,id uint) (string,error)
 	Total(ctx context.Context) (float32,error)
 	Top(ctx context.Context, count uint) ([]database.ProductOutTop, error)
+	QuantityOrdered(ctx context.Context, id uint) (uint, error)
+}
+
+func (o *OrderService) QuantityOrdered(ctx context.Context, id uint) (uint, error) {
+	var items []database.OrderItem
+	result:=o.DB.Where("product_id = ?",id).Find(&items)
+	var qty uint
+	qty=0
+	if result.Error != nil {
+		return qty,nil
+	}
+	for _, item := range items {
+		qty+=item.Count
+	}
+	return qty,nil
 }
 
 func (o *OrderService) GetByID(ctx context.Context, id uint) ([]database.OrderItemOut, error) {

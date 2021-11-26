@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"encoding/json"
 	"gorm.io/gorm"
 	"io"
 	"math/rand"
@@ -54,7 +55,7 @@ type ProductOut struct {
 	Deletable bool `json:"deletable"`
 }
 
-func (p *Product) Out() ProductOut {
+func (p *Product) Out(authHeader string) ProductOut {
 	return ProductOut{
 		ID:          p.ID,
 		Name:        p.Name,
@@ -63,12 +64,32 @@ func (p *Product) Out() ProductOut {
 		Price:       p.Price,
 		Discount:    p.Discount,
 		CategoryID:  p.CategoryID,
-		Deletable: p.IsDeletable(),
+		Deletable: p.IsDeletable(authHeader),
 	}
 }
 
-func (p *Product) IsDeletable() bool {
-	return false
+type QuantityOrderedResponse struct {
+	Quantity uint `json:"quantity"`
+}
+
+func (p *Product) IsDeletable(authHeader string) bool {
+	client:=&http.Client{}
+	req,err:=http.NewRequest("GET",os.Getenv("ORDER_SERVICE")+"/QuantityOrdered/"+strconv.Itoa(int(p.ID)),nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Add("Authorization",authHeader)
+	res, err := client.Do(req)
+	if err != nil || res.StatusCode!=200 {
+		return false
+	}
+	var response QuantityOrderedResponse
+	err=json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return false
+	}
+
+	return response.Quantity==0
 }
 
 func (i *ProductIn) In() Product {
@@ -82,10 +103,10 @@ func (i *ProductIn) In() Product {
 	}
 }
 
-func ProductArrayOut(models []Product) []ProductOut {
+func ProductArrayOut(models []Product,authHeader string) []ProductOut {
 	outArr:=make([]ProductOut,len(models))
 	for i,item := range models {
-		outArr[i]=item.Out()
+		outArr[i]=item.Out(authHeader)
 	}
 	return outArr
 }

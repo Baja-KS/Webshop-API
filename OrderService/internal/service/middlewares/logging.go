@@ -15,6 +15,17 @@ type LoggingMiddleware struct {
 	Next   service.Service
 }
 
+func (l *LoggingMiddleware) QuantityOrdered(ctx context.Context, id uint) (qty uint,err error) {
+	defer func(begin time.Time) {
+		err := l.Logger.Log("method", "qty ordered", "qty",qty,"product_id",id ,"err", err, "took", time.Since(begin))
+		if err != nil {
+			return
+		}
+	}(time.Now())
+	qty, err = l.Next.QuantityOrdered(ctx, id)
+	return
+}
+
 func (l *LoggingMiddleware) GetByID(ctx context.Context, id uint) (order []database.OrderItemOut, err error) {
 	defer func(begin time.Time) {
 		err := l.Logger.Log("method", "get by id", "id",id ,"err", err, "took", time.Since(begin))

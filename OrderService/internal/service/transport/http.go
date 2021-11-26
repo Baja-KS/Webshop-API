@@ -40,6 +40,7 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	DeleteHandler:=httptransport.NewServer(ep.DeleteEndpoint,endpoints.DecodeDeleteRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 	TotalHandler:=httptransport.NewServer(ep.TotalEndpoint,endpoints.DecodeTotalRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 	TopHandler:=httptransport.NewServer(ep.TopEndpoint,endpoints.DecodeTopRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
+	QuantityOrderedHandler:=httptransport.NewServer(ep.QuantityOrderedEndpoint,endpoints.DecodeQuantityOrderedRequest,endpoints.EncodeResponse,httptransport.ServerBefore(AuthExtractor))
 
 
 	router.Handle("/GetByID/{id}",GetByIDHandler).Methods(http.MethodGet)
@@ -48,6 +49,7 @@ func NewHTTPHandler(ep endpoints.EndpointSet) http.Handler {
 	router.Handle("/Delete/{id}",DeleteHandler).Methods(http.MethodDelete)
 	router.Handle("/Total",TotalHandler).Methods(http.MethodGet)
 	router.Handle("/Top",TopHandler).Methods(http.MethodGet)
+	router.Handle("/QuantityOrdered/{id}",QuantityOrderedHandler).Methods(http.MethodGet)
 	router.Handle("/metrics",promhttp.Handler()).Methods(http.MethodGet)
 
 

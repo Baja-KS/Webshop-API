@@ -30,6 +30,7 @@ services:
       - AUTH_SERVICE=$AUTH_SERVICE
       - CATEGORY_SERVICE=$CATEGORY_SERVICE
       - IMG_SERVICE=$IMG_SERVICE
+      - ORDER_SERVICE=$ORDER_SERVICE
     ports:
       - "8083:8080"
     depends_on:

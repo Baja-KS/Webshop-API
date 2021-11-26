@@ -66,6 +66,14 @@ type TopResponse struct {
 	Products []database.ProductOutTop `json:"products"`
 }
 
+type QuantityOrderedRequest struct {
+	ID uint `json:"id"`
+}
+
+type QuantityOrderedResponse struct {
+	Quantity uint `json:"quantity"`
+}
+
 
 func DecodeGetByIDRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request GetByIDRequest
@@ -124,6 +132,15 @@ func DecodeTopRequest(ctx context.Context, r *http.Request) (interface{}, error)
 	return request,nil
 }
 
+func DecodeQuantityOrderedRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var request QuantityOrderedRequest
+	id,err:=ParseIDFromURL(r)
+	if err != nil {
+		return request,err
+	}
+	request.ID=id
+	return request,nil
+}
 
 func EncodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type","application/json; charset=UTF-8")
