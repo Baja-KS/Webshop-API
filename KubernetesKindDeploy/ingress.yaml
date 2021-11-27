@@ -16,39 +16,39 @@ spec:
              service:
                name:  auth-service
                port:
-                 number: 8080
+                 number: 80
           - path: /Group(/|$)(.*)
             pathType: Prefix
             backend:
              service:
                name:  group-service
                port:
-                 number: 8081
+                 number: 80
           - path: /Category(/|$)(.*)
             pathType: Prefix
             backend:
              service:
                name:  category-service
                port:
-                 number: 8082
+                 number: 80
           - path: /Product(/|$)(.*)
             pathType: Prefix
             backend:
              service:
                name:  product-service
                port:
-                 number: 8083
+                 number: 80
           - path: /Order(/|$)(.*)
             pathType: Prefix
             backend:
              service:
                name:  order-service
                port:
-                 number: 8084
+                 number: 80
           - path: /Img(/|$)(.*)
             pathType: Prefix
             backend:
              service:
                name:  img-service
                port:
-                 number: 8090
+                 number: 3000

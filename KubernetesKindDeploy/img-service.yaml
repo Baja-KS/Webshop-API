@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: img-ss
+  labels:
+    app: img
+spec:
+  replicas: 1
+  serviceName: img-service  
+  selector:
+    matchLabels:
+      app: img
+  volumeClaimTemplates:
+    - metadata:
+        name: img-vol
+      spec:
+        accessModes:  [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage:  100Mi  
+
+  template:
+    metadata:
+      labels:
+        app: img
+    spec:
+      containers:
+      - name: img-svc
+        image: bajaks/webshop-api-microservices/img-service:v1.0 
+        volumeMounts:
+          - name: img-vol
+            mountPath:  /resources/img
+        ports:
+        - containerPort: 3000
+        env:
+          - name: NODE_ENV
+            value:  development
+          - name: AUTH_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: service-host-list-config
+                key:  auth-service
+
+
+
+
+
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: img-service
+spec:
+  selector:
+    app: img
+  clusterIP:  None
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+

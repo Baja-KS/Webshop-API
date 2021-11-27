@@ -7,6 +7,6 @@ data:
   db-url: category-db-service
   db-type:  postgres
   db-ssl-mode:  disable
-  db-port:  5432
+  db-port:  "5432"
   db-name:  CategoryServiceDB
 

@@ -4,4 +4,4 @@ metadata:
   name: common-service-config
 
 data:
-  seed-empty: true
+  seed-empty: "true"

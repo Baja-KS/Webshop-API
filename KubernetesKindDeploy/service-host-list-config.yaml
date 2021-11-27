@@ -4,9 +4,10 @@ metadata:
   name: service-host-list-config
 
 data:
-  auth-service: auth-service
-  group-service:  group-service
-  category-service: category-service
-  product-service:  product-service
-  order-service:  order-service
-  img-service:  img-service
+  auth-service: http://auth-service
+  group-service:  http://group-service
+  category-service: http://category-service
+  product-service:  http://product-service
+  order-service:  http://order-service
+  img-service:  http://img-service:3000
+  # category-service: 10.244.0.25

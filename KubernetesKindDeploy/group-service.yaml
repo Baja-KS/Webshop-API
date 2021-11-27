@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group
+  labels:
+    app: group
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: group
+  template:
+    metadata:
+      labels:
+        app: group
+    spec:
+      containers:
+      - name: sidecar
+        image:  alpine:latest
+        command:  ["/bin/sh"]
+        tty:  true
+        ports:
+        - containerPort:  9000
+      - name: group-svc
+        image:  bajaks/webshop-api-microservices/group-service:v1.0
+        imagePullPolicy:  Never
+        ports:
+        - containerPort: 8080
+        env:
+          - name: JWT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: common-service-secret
+                key:  jwt-key
+          - name: SEED_IF_EMPTY
+            valueFrom:
+              configMapKeyRef:
+                name: common-service-config
+                key:  seed-empty
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: group-db-secret
+                key:  db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: group-db-secret
+                key:  db-password
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-url
+          - name: DB_DB
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-type
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-url
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-port
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-name
+          - name: SSL_MODE
+            valueFrom:
+              configMapKeyRef:
+                name: group-db-config
+                key:  db-ssl-mode
+          - name: AUTH_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: service-host-list-config
+                key:  auth-service
+          - name: CATEGORY_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: service-host-list-config
+                key:  category-service
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: group-service
+spec:
+  selector:
+    app: group
+    #clusterIP:  None
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+

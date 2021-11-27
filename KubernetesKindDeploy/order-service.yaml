@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  labels:
+    app: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+      - name: order-svc
+        image:  bajaks/webshop-api-microservices/order-service:v1.0
+        imagePullPolicy:  Never
+        ports:
+        - containerPort: 8080
+        env:
+          - name: JWT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: common-service-secret
+                key:  jwt-key
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: order-db-secret
+                key:  db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: order-db-secret
+                key:  db-password
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-url
+          - name: DB_DB
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-type
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-url
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-port
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-name
+          - name: SSL_MODE
+            valueFrom:
+              configMapKeyRef:
+                name: order-db-config
+                key:  db-ssl-mode
+          - name: AUTH_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: service-host-list-config
+                key:  auth-service
+          - name: PRODUCT_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: service-host-list-config
+                key:  product-service
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order
+    #  clusterIP:  None
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
